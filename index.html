@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta UniProt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Buscar Proteína no UniProt</h1>
+    <input type="text" id="proteinInput" placeholder="Digite o nome da proteína (ex: P53)">
+    <button onclick="searchProtein()">Buscar</button>
+
+    <pre id="result">O resultado aparecerá aqui...</pre>
+
+    <script>
+        function searchProtein() {
+            const protein = document.getElementById('proteinInput').value;
+            const url = `https://rest.uniprot.org/uniprotkb/search?query=${protein}&format=json`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const resultArea = document.getElementById('result');
+                    if (data.results && data.results.length > 0) {
+                        let output = "";
+                        data.results.forEach(item => {
+                            const id = item.primaryAccession;
+                            const name = item.proteinDescription?.recommendedName?.fullName?.value || "Sem nome disponível";
+                            const organism = item.organism?.scientificName || "Organismo desconhecido";
+                            output += `ID: ${id}\nNome: ${name}\nOrganismo: ${organism}\n\n`;
+                        });
+                        resultArea.textContent = output;
+                    } else {
+                        resultArea.textContent = "Nenhum resultado encontrado.";
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('result').textContent = "Erro na consulta: " + error;
+                });
+        }
+    </script>
+</body>
+</html>
